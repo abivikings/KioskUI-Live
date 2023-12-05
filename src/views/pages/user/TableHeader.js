@@ -12,6 +12,10 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 
 import AddUserDrawer from './AddUser'
 import { Icon } from '@iconify/react'
+import { Grid } from '@mui/material'
+import { Controller, useForm } from 'react-hook-form'
+import { useEffect } from 'react'
+import Link from 'next/link'
 
 const TableHeader = props => {
   // ** Props
@@ -20,13 +24,23 @@ const TableHeader = props => {
   // const [addUserOpen, setAddUserOpen] = useState(false)
   // const toggleAddUserDrawer = () => setAddUserOpen(!addUserOpen)
 
-  const handleAddUser = (x) => {
-    if(x){
-      alert("Successfully User Added")
+  const handleAddUser = x => {
+    if (x) {
+      alert('Successfully User Added')
       userAdded
+    } else {
     }
   }
-  
+
+  const { control, watch } = useForm()
+  const ur = watch('userrole')
+
+  useEffect(() => {
+    console.log(control._formValues.userrole, ur)
+    userType(control._formValues.userrole)
+  }, [control, ur])
+
+  // console.log('Boom --> ', control._formValues.userrole)
 
   return (
     <Box
@@ -41,29 +55,54 @@ const TableHeader = props => {
         justifyContent: 'space-between'
       }}
     >
+      <Grid container spacing={6}>
+        <Grid item sm={6} xs={12}>
+          <Controller
+            name='userrole'
+            control={control}
+            rules={{ required: true }}
+            defaultValue={'student'}
+            render={({ field: { value, onChange } }) => (
+              <CustomTextField
+                select
+                value={value}
+                onChange={onChange}
+                fullWidth
+                id='userrole-select'
+                label='Filter Role'
+                sx={{ mb: 4 }}
+                aria-describedby='validation-userrole-select'
+                SelectProps={{
+                  native: true // For Material-UI native Select
+                }}
+              >
+                {/* <option value='null'>User Role</option> */}
+                <option value='admin'>Admin</option>
+                <option value='teacher'>Teacher</option>
+                <option value='student'>Student</option>
+              </CustomTextField>
+            )}
+          />
+        </Grid>
+        <Grid item sm={6} xs={12}>
 
-      <Button color='warning' variant='tonal' value='admin' onClick={e => userType(e.target.value)} startIcon={<Icon icon='tabler:user-shield' />}>
-        Admin
-      </Button>
-      <Button color='warning' variant='tonal'  value='teacher' onClick={e => userType(e.target.value)}  startIcon={<Icon icon='tabler:user-star' />}>
-        Teacher
-      </Button>
-      <Button color='warning' variant='tonal'  value='student' onClick={e => userType(e.target.value)}  startIcon={<Icon icon='tabler:user-edit' />}>
-        Student
-      </Button>
+        <Box sx={{ rowGap: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+          <CustomTextField
+            value={value}
+            sx={{ mr: 4 }}
+            placeholder='Search User'
+            onChange={e => handleFilter(e.target.value)}
+            label='Search'
+          />
 
+          <AddUserDrawer toggle={handleAddUser} userTypeChoosed={ur} />
 
-      <Box sx={{ rowGap: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-        <CustomTextField
-          value={value}
-          sx={{ mr: 4 }}
-          placeholder='Search User'
-          onChange={e => handleFilter(e.target.value)}
-        />
-        
-          <AddUserDrawer toggle={handleAddUser} />
-          
-      </Box>
+          <Button href={'/fileUpload'} component={Link} variant='contained' sx={{marginTop: '23px', marginLeft: "15px"}}>
+            <a> Upload CSV </a>
+          </Button>
+        </Box>
+      </Grid>
+      </Grid>
     </Box>
   )
 }

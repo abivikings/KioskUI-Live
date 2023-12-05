@@ -101,6 +101,7 @@ const bulkData = async () => {
     }
     
 }
+
   // Function to download JSON file
   //   const downloadJSON = () => {
   //     if (jsonData) {
@@ -122,6 +123,8 @@ const bulkData = async () => {
     <div>
       <input type='file' accept='.csv' onChange={handleFileUpload} />
       {/* <button onClick={downloadJSON}>Download JSON</button> */}
+
+      <a href='https://docs.google.com/spreadsheets/d/1WpoL6qkWtZws9MN_xAa_xB5EMAoeP1Q_67FTTmvK0q0/edit?usp=sharing' target='_blank'>Download</a>
 
       {jsonData && (
         <table>

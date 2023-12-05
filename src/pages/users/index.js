@@ -31,6 +31,7 @@ import QrGen from '../../views/pages/user/QrGen'
 
 import ProfileSummery from "src/views/pages/profile/Summery"
 import EditUserDrawer from 'src/views/pages/user/EditUser'
+import { useAuth } from 'src/hooks/useAuth'
 // import QRCode from 'qrcode.react'
 
 const demoData = {
@@ -71,17 +72,29 @@ const CustomCloseButton = styled(IconButton)(({ theme }) => ({
 }))
 
 const UserList = () => {
+  const auth = useAuth()
 
-  const [qr, setQr] = useState('') 
+  const entryPerson = !!auth?.user ? auth?.user.userId : 'unauthorizedEntry'
+
+  const [qr, setQr] = useState('')
   const [viewData, setViewData] = useState('')
   const [editData, setEditData] = useState('')
   const [show, setShow] = useState(false)
+  const [showQR, setShowQR] = useState(false)
+  const [success, setSuccess] = useState('')
 
-  const RowOptions = ({ id, email, dataUser }) => {
+  const onSuccessHandler = (x) => {
+    setSuccess(x)
+    setShow(false)
+    console.log("Success Table of User -> ", x)
+  }
 
-    const qrHandler = ({email, dataUser}) => {
-      setQr({email, dataUser})
-      setShow(true)
+  const RowOptions = ({ id, email, userId, dataUser }) => {
+
+    const qrHandler = ({userId}) => {
+      console.log("userId->",userId)
+      setQr({userId, dataUser})
+      setShowQR(true)
     }
 
     const viewHandler = event => {
@@ -97,17 +110,67 @@ const UserList = () => {
       setEditData(dataUser)
     }
 
-    const deleteHandler = event => {
+    const deleteHandler = async event => {
+      const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/User` //////
 
-      
+      console.log("User Info -> ",event)
 
-      alert(`Delete -> ${event}`)
+      const deleteUserData = {
+        Id: event.Id,
+        UserId: event.userid,
+        MemberId: event.MemberId,
+        UserRole: event.userrole,
+        PIN: event.PIN,
+        UserName: event.username,
+        Password: event.password,
+        email: event.email,
+        UpdateBy: entryPerson,
+        UserProfiles: {
+          Id: event.ProfileId,
+          UserAccountId: event.Id,
+          UserId: event.userid,
+          FullName: event.fullname,
+          Class: !!event.Class ? event.Class : "null",
+          Grade: !!event.grade ? event.grade : "null",
+          UpdateBy: entryPerson
+        }
+
+      }
+
+
+      const myHeaders = new Headers()
+      myHeaders.append('Content-Type', 'application/json')
+
+      const requestOptions = {
+        method: 'DELETE',
+        headers: myHeaders,
+        body: JSON.stringify(deleteUserData),
+        redirect: 'follow'
+      }
+
+      console.log(' requestOptions => ', requestOptions)
+
+      const res = await fetch(my_url, requestOptions)
+      const data = await res.json()
+      if (res.ok) {
+        // dispatch(usersList(userDispatch))
+        // alert('Success') 
+        // console.log("first", param) 
+        alert(`Delete -> ${event}`)
+
+        return { ok: true, data }
+      } else {
+        console.log('ERROR => ', data.error)
+
+        return { ok: false, err: res, data }
+      }
+
     }
 
     return (
       <>
         <ButtonGroup variant='contained' aria-label='outlined primary button group'>
-          <Button onClick={() => qrHandler({email, dataUser})}>
+          <Button onClick={() => qrHandler({ userId, dataUser })}>
             <Icon icon='tabler:qrcode' />
           </Button>
           <Button onClick={() => viewHandler(id)}>
@@ -116,7 +179,7 @@ const UserList = () => {
           <Button onClick={() => editHandler(id)}>
             <Icon icon='tabler:pencil' />
           </Button>
-          <Button onClick={() => deleteHandler(id)}>
+          <Button onClick={() => deleteHandler(dataUser)}>
             <Icon icon='tabler:trash' />
           </Button>
         </ButtonGroup>
@@ -208,7 +271,7 @@ const UserList = () => {
       field: 'actions',
       headerName: 'Actions',
 
-      renderCell: ({ row }) => <RowOptions id={row.id} email={row.email} dataUser={row} />
+      renderCell: ({ row }) => <RowOptions id={row.id} email={row.email} userId={row.userId} dataUser={row} />
     }
   ]
 
@@ -219,7 +282,7 @@ const UserList = () => {
   const [allUsers, setAllUsers] = useState([])
   const [allUsers2, setAllUsers2] = useState([])
 
-  const my_url = `https://vehayamachanechakadosh.com:8080/api/GetAllUserInfo?Stauts=all` ////// Leads Company Admin
+  const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/GetAllUserInfo?Stauts=all` ////// Leads Company Admin
 
   const userStateData = useSelector(state => state.users.data)
 
@@ -229,7 +292,8 @@ const UserList = () => {
   // get User from API
   useEffect(() => {
     fetchData()
-  }, [])
+    console.log("success ----> ", success)
+  }, [success])
 
   async function fetchData() {
     const myHeaders = new Headers()
@@ -251,7 +315,7 @@ const UserList = () => {
         ...row
       }))
 
-      // console.log(formattedData)
+      console.log(formattedData)
       setAllUsers(formattedData)
       setAllUsers2(formattedData)
 
@@ -302,7 +366,7 @@ const UserList = () => {
 
   return (
     <Grid container spacing={6.5}>
-      
+
 
       <Grid item xs={12}>
         <Card>
@@ -323,12 +387,12 @@ const UserList = () => {
       </Grid>
       <Grid item xs={12}>
         <Card>
-          
-          <ProfileSummery data={viewData} show={show}  success={setShow} />
 
-          <EditUserDrawer data={editData} show={show} success={setShow} />
-          
-          <QrGen qr={qr.email} userData={qr.dataUser} show={show} success={setShow} />
+          <ProfileSummery data={viewData} show={show} />
+
+          <EditUserDrawer data={editData} show={show} onSuccess={onSuccessHandler} />
+
+          <QrGen qr={qr.userId} userData={qr.dataUser} show={showQR} />
         </Card>
       </Grid>
     </Grid>

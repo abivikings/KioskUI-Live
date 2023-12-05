@@ -108,8 +108,8 @@ const Masterdata = () => {
   const [Namevalue, setNamevalue] = useState('')
   const [Accesskeyvalue, setAccesskeyvalue] = useState('')
   const [Editvalue, setEditvalue] = useState('')
-  //const my_url = `https://vehayamachanechakadosh.com:8080/api/MasterChild?Stauts=all&MasterId=1` ////// Leads Company Admin
-  const my_url = `https://vehayamachanechakadosh.com:8080/api/MasterChild` ////// Leads Company Admin
+  //const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/MasterChild?Stauts=all&MasterId=1` ////// Leads Company Admin
+  const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/MasterChild` ////// Leads Company Admin
   const userStateData = useSelector(state => state.users.data)
   //console.log('User State Data => ', userStateData)
   //const dispatch = useDispatch()

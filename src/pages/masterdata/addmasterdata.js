@@ -99,7 +99,7 @@ const AddMasterdataDrawer = props => {
     postData(data) ;
   } 
   
-  const my_url = `https://vehayamachanechakadosh.com:8080/api/MasterChild` ////// Leads Company Admin
+  const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/MasterChild` ////// Leads Company Admin
   
   const postData = async (param) => {
     

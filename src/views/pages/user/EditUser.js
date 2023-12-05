@@ -60,7 +60,7 @@ const CustomCloseButton = styled(IconButton)(({ theme }) => ({
 }))
 
 const EditUserDrawer = param => {
-  const { toggle } = param
+  
   const data = param?.data
 
   const [show, setShow] = useState(param?.show)
@@ -78,6 +78,7 @@ const EditUserDrawer = param => {
   })
 
   //   const userRole = watch('userrole')
+  // console.log("boom ----> ",watch('userrole'), control._formValues.userrole)
   const [userRole, setUserRole] = useState(watch('userrole'))
   const [userMemberId, setUserMemberId] = useState()
 
@@ -87,61 +88,12 @@ const EditUserDrawer = param => {
     }
     setUserRole(data?.userrole)
     setUserMemberId(data?.MemberId?.toString())
-    console.log(' data?.MemberId?.toString() -> ', data?.MemberId?.toString())
-  }, [data])
-
-  const demoGetData = {
-    id: 2,
-    MemberId: 2,
-    Member: 'Silver  member',
-    userid: '1700599640',
-    userrole: 'Student',
-    PIN: 5781,
-    fullname: 'Abraham',
-    nickname: null,
-    Class: 'W',
-    grade: '3',
-    filepath: null,
-    filename: null,
-    email: 'abraham001@gmail.com',
-    password: '6iECjk0)',
-    Id: 2,
-    EntryDt: '2023-11-04T00:00:00',
-    EntryBy: 'sysadmin',
-    UpdateDt: '2023-11-21T20:47:21.003',
-    UpdateBy: null,
-    IsActive: true,
-    Remarks: null
-  }
-
-  const demoUpdateData = {
-    Id: 2,
-    UserId: '1700599640',
-    MemberId: '1',
-    UserRole: 'admin',
-    PIN: 4567,
-    UserName: 'test',
-    Password: '1234',
-    email: 'juliocesar@gmail.com',
-    UpdateBy: 'sysadmin',
-    UserProfiles: {
-      Id: 2,
-      UserAccountId: 2,
-      UserId: '1700599640',
-      FullName: 'Abraham Lincon',
-      Class: 'X',
-      Grade: '47',
-      UpdateBy: 'sysadmin'
-    }
-  }
-
-  const { randomString, generateRandomString } = useRandomString(4) // if you are wishing to gereate random string //
-
-  const { password, generateRandomPassword } = useRandomPassword()
+    console.log(' data -> ', data)
+  }, [data,])
 
   useEffect(() => {
-    console.log(userRole)
-    if (userRole !== 'Student') {
+    // console.log(userRole)
+    if (userRole !== 'student') {
       const inputClear = ['Class', 'grade']
       inputClear.forEach(fieldName => {
         setValue(fieldName, null)
@@ -153,83 +105,25 @@ const EditUserDrawer = param => {
   const entryPerson = !!auth?.user ? auth?.user.userId : 'unauthorizedEntry'
   const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/User` //////
 
-  console.log(' entry Person => ', entryPerson)
-  // console.log(' Form Val => ', control._formValues)
-  useEffect(() => {
-    generateRandomString()
-    generateRandomPassword() // it will generate 8 char random password - minimum a small letter, a capital letter, a number and a special character
-  }, [])
-
-  useEffect(() => {
-    const putData = async () => {
-      const myHeaders = new Headers()
-      myHeaders.append('Content-Type', 'application/json')
-
-      const datas = {
-        Id: 3,
-        UserId: '1700772433',
-        MemberId: '3',
-        UserRole: 'Student',
-        PIN: 4567,
-        UserName: 'bunga',
-        Password: '1234',
-        email: 'bungabunga@gmail.com',
-        UpdateBy: 'chaim.levilev@gmail.com"',
-        UserProfiles: {
-          Id: 58,
-          UserAccountId: 3,
-          UserId: '1700772433',
-          FullName: 'Bunga Lala',
-          Class: 'X',
-          Grade: '4',
-          UpdateBy: 'chaim.levilev@gmail.com"'
-        }
-      }
-
-      const requestOptions = {
-        method: 'PUT',
-        headers: myHeaders,
-        body: JSON.stringify(datas),
-        redirect: 'follow'
-      }
-
-      // const res = await fetch(my_url, requestOptions)
-      // const data = await res.json()
-      // if (res.ok) {
-
-      //   console.log("X data =-=>",data)
-
-      //   return { ok: true, data }
-      // } else {
-      //   console.log('ERROR => ', data.error)
-
-      //   return { ok: false, err: res, data }
-      // }
-    }
-
-    putData()
-  }, [])
-
-  useEffect(() => {
-    console.log('Control form -> ', control)
-  }, [control])
-
-  const onSubmit = data => {
-    const randomPassword = password
+  const onSubmit = dataX => { 
 
     const userAddData = {
-      MemberId: data.Member,
-      userrole: data.userrole,
-      username: data.username,
+      Id: data.Id,
+      UserId: data.userid,
+      MemberId: dataX.Member,
+      UserRole: dataX.userrole,
+      PIN: data.PIN,
+      UserName: dataX.username,
+      Password: data.password,
+      email: dataX.email,
       UpdateBy: entryPerson,
-      email: data.email,
-      userId: 'null',
-      password: randomPassword,
-      PIN: randomString,
       UserProfiles: {
-        fullname: data.fullname,
-        Class: data.Class ? data.Class : null,
-        grade: data.grade ? data.grade : null,
+        Id: data.ProfileId,
+        UserAccountId: data.Id,
+        UserId: data.userid,
+        FullName: dataX.fullname,
+        Class: !!dataX.Class ? dataX.Class : "null",
+        Grade: !!dataX.grade ? dataX.grade : "null",
         UpdateBy: entryPerson
       }
     }
@@ -239,7 +133,7 @@ const EditUserDrawer = param => {
     postData(userAddData)
   }
 
-  const postData = async param => {
+  const postData = async userUpdatedData => {
     const myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')
 
@@ -248,25 +142,27 @@ const EditUserDrawer = param => {
     const requestOptions = {
       method: 'PUT',
       headers: myHeaders,
-      body: JSON.stringify(param),
+      body: JSON.stringify(userUpdatedData),
       redirect: 'follow'
     }
 
     console.log(' requestOptions => ', requestOptions)
 
-    // const res = await fetch(my_url, requestOptions)
-    // const data = await res.json()
-    // if (res.ok) {
-    //   // dispatch(usersList(userDispatch))
-    //   setShow(false)
-    //   toggle(true)
+    const res = await fetch(my_url, requestOptions)
+    const data = await res.json()
+    if (res.ok) {
+      // dispatch(usersList(userDispatch))
+      alert('Success')
+      setShow(false)
+      // console.log("first", param)
+      param.onSuccess(data)
 
-    //   return { ok: true, data }
-    // } else {
-    //   console.log('ERROR => ', data.error)
+      return { ok: true, data }
+    } else {
+      console.log('ERROR => ', data.error)
 
-    //   return { ok: false, err: res, data }
-    // }
+      return { ok: false, err: res, data }
+    }
   }
 
   const handleClose = () => {
@@ -391,9 +287,9 @@ const EditUserDrawer = param => {
                       }}
                     >
                       <option value='null'>User Role</option>
-                      <option value='Admin'>Admin</option>
-                      <option value='Teacher'>Teacher</option>
-                      <option value='Student'>Student</option>
+                      <option value='admin'>Admin</option>
+                      <option value='teacher'>Teacher</option>
+                      <option value='student'>Student</option>
                     </CustomTextField>
                   )}
                 />
@@ -427,7 +323,7 @@ const EditUserDrawer = param => {
                   )}
                 />
               </Grid>
-              {userRole === 'Student' && (
+              {(userRole === 'student' || control._formValues.userrole=== 'student') && (
                 <>
                   <Grid item sm={6} xs={12}>
                     <Controller

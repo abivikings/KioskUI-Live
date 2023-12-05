@@ -28,8 +28,8 @@ import { useRouter } from 'next/router'
 import Modal from '@mui/material'
 
 export default function QrCodeScanner() {
-  const [isPinVisible, setPinVisible] = useState(true);
-  const [isPasswordVisible, setPasswordVisible] = useState(false);
+  const [isPinVisible, setPinVisible] = useState(true)
+  const [isPasswordVisible, setPasswordVisible] = useState(false)
 
   const theme = useTheme()
 
@@ -62,7 +62,7 @@ export default function QrCodeScanner() {
       scanner.clear()
       setScanResult(result)
       axios
-        .get(`https://vehayamachanechakadosh.com:8080/api/GetUserInfoByUserId?UserId=${result}`)
+        .get(`${process.env.NEXT_PUBLIC_BASE_URL}api/GetUserInfoByUserId?UserId=${result}`)
         .then(response => setData(response.data))
 
       //   alert('Get Lol')
@@ -83,28 +83,27 @@ export default function QrCodeScanner() {
     const val = Number(x.target.value)
     if (val === data.PIN) {
       setSucc(true)
-      const { userid, password } = data
-      const email = userid
+      const { email, password } = data
+
       auth.login({ email, password }, () => {
         setError('email', {
           type: 'manual',
           message: 'Email or Password is invalid'
         })
       })
-    }
-    else{
+    } else {
       setSucc(false)
       setError({
         type: 'manual',
         message: (
           <span>
-            Incorrect PIN. {' '}
+            Incorrect PIN.{' '}
             <span style={{ color: '#12A3EA', cursor: 'pointer' }} onClick={handlePasswordReset}>
-              Click Here 
+              Click Here
             </span>
             &nbsp;to RESET your password.
           </span>
-        ),
+        )
       })
     }
   }
@@ -116,25 +115,27 @@ export default function QrCodeScanner() {
     formState: { errors },
     getValues,
     watch,
-    setValue 
+    setValue
   } = useForm({
     mode: 'onSubmit'
   })
-  const userId = data.userid;
-  
+  const userId = data.userId
+
   const onSubmit = data => {
     const updatePINpass = {
       password: data.password,
       PIN: data.PIN,
       UserId: userId,
-      UpdateBy: userId
+      UpdateBy: userId,
+      email: data.email,
+      userrole: data.userrole
     }
 
     console.log('updatePINpass ===> ', updatePINpass)
 
     postData(updatePINpass)
   }
-  const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/User/PINPassword` ////// 
+  const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/User/PINPassword` //////
 
   const postData = async param => {
     const myHeaders = new Headers()
@@ -149,70 +150,61 @@ export default function QrCodeScanner() {
       redirect: 'follow'
     }
 
-
     console.log(requestOptions)
 
     const res = await fetch(my_url, requestOptions)
     const data = await res.json()
     if (res.ok) {
-
-        // dispatch(usersList(userDispatch))
+      // dispatch(usersList(userDispatch))
       // setShow(false)
       // toggle(true)
       router.replace('/')
 
       return { ok: true, data }
-    } 
-    else {
+    } else {
       console.log('ERROR => ', data.error)
-      
+
       return { ok: false, err: res, data }
     }
   }
-  
+
   const passwordCheck = watch('passwordCheck', '')
-  
-  const {
-    handleSubmit: passwordCheckHandler,
-  } = useForm({
+
+  const { handleSubmit: passwordCheckHandler } = useForm({
     mode: 'onSubmitPass'
   })
+  const [isResetPIN, setResetPIN] = React.useState(false)
 
-  
   const [isPassError, setPassError] = useState(false)
   const passCheck = data.password
-  
-  const onSubmitPass = (data) => {
+
+  const onSubmitPass = data => {
     if (passwordCheck === passCheck) {
       setResetPIN(true)
       setPasswordVisible(false)
       setPassError(false)
-    }
-    else{
+    } else {
       setError({
-      type: 'manual',
-      messagePass: (
-        <span style={{marginTop: '0px'}}>
-          Incorrect Password. {' '}
-          <span style={{ color: '#12A3EA', cursor: 'pointer'}} onClick={handleOpen}>
-            Click Here 
+        type: 'manual',
+        messagePass: (
+          <span style={{ marginTop: '0px' }}>
+            Incorrect Password.{' '}
+            <span style={{ color: '#12A3EA', cursor: 'pointer' }} onClick={handleOpen}>
+              Click Here
+            </span>
+            &nbsp;to RESET your password.
           </span>
-          &nbsp;to RESET your password.
-        </span>
-      ),
-    })
-    setPassError(true)
+        )
+      })
+      setPassError(true)
     }
   }
   const [open, setOpen] = React.useState(false)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
-  
-  const [isResetPIN, setResetPIN] = React.useState(false)
 
-  const {
-    handleSubmit: handlePinSubmit,
-  } = useForm({
+
+  const { handleSubmit: handlePinSubmit } = useForm({
     mode: 'onPinSubmit'
   })
 
@@ -241,23 +233,20 @@ export default function QrCodeScanner() {
       redirect: 'follow'
     }
 
-
     console.log(requestOptions)
 
     const res = await fetch(my_url, requestOptions)
     const data = await res.json()
     if (res.ok) {
-
-        // dispatch(usersList(userDispatch))
+      // dispatch(usersList(userDispatch))
       // setShow(false)
       // toggle(true)
       router.replace('/')
 
       return { ok: true, data }
-    } 
-    else {
+    } else {
       console.log('ERROR => ', data.error)
-      
+
       return { ok: false, err: res, data }
     }
   }
@@ -288,121 +277,97 @@ export default function QrCodeScanner() {
 
       {scanResult ? (
         <>
-          {data.userid === scanResult && !succ ? (
+          {data.userId === scanResult && !succ ? (
             <div>
               {data.userstatus !== 'NEW' ? (
                 <div>
                   <h4>Please set up the PIN and password to continue..</h4>
-                  
-        <form onSubmit={handleSubmit(onSubmit)}>
-                  
-                  <Controller
-                    name='PIN'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field: { value, onChange } }) => (
-                      <CustomTextField
-                        fullWidth
-                        value={value}
-                        sx={{ mb: 4 }}
-                        label='PIN'
-                        onChange={onChange}
-                        type={showPassword ? 'text' : 'password'}
-                        error={Boolean(errors.PIN)}
-                        {...(errors.PIN && { helperText: errors.PIN.message })}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position='end'>
-                              <IconButton
-                                edge='end'
-                                onMouseDown={e => e.preventDefault()}
-                                onClick={() => setShowPassword(!showPassword)}
-                              >
-                                <Icon fontSize='1.25rem' fontColor='black' icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                      />
-                    )}
-                  />
-                  
-                  <Controller
-                    name='password'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field: { value, onChange } }) => (
-                      <CustomTextField
-                        fullWidth
-                        value={value}
-                        sx={{ mb: 4 }}
-                        label='Password'
-                        onChange={onChange}
-                        type={showPassword ? 'text' : 'password'}
-                        error={Boolean(errors.password)}
-                        {...(errors.password && { helperText: errors.password.message })}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position='end'>
-                              <IconButton
-                                edge='end'
-                                onMouseDown={e => e.preventDefault()}
-                                onClick={() => setShowPassword(!showPassword)}
-                              >
-                                <Icon fontSize='1.25rem' fontColor='black' icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                      />
-                    )}
-                  />
-                  <Button type='submit' variant='contained'>Set PIN & Password</Button>
-          </form>
+
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                    <Controller
+                      name='PIN'
+                      control={control}
+                      rules={{ required: true }}
+                      render={({ field: { value, onChange } }) => (
+                        <CustomTextField
+                          fullWidth
+                          value={value}
+                          sx={{ mb: 4 }}
+                          label='PIN'
+                          onChange={onChange}
+                          type={showPassword ? 'text' : 'password'}
+                          error={Boolean(errors.PIN)}
+                          {...(errors.PIN && { helperText: errors.PIN.message })}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position='end'>
+                                <IconButton
+                                  edge='end'
+                                  onMouseDown={e => e.preventDefault()}
+                                  onClick={() => setShowPassword(!showPassword)}
+                                >
+                                  <Icon
+                                    fontSize='1.25rem'
+                                    fontColor='black'
+                                    icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'}
+                                  />
+                                </IconButton>
+                              </InputAdornment>
+                            )
+                          }}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name='password'
+                      control={control}
+                      rules={{ required: true }}
+                      render={({ field: { value, onChange } }) => (
+                        <CustomTextField
+                          fullWidth
+                          value={value}
+                          sx={{ mb: 4 }}
+                          label='Password'
+                          onChange={onChange}
+                          type={showPassword ? 'text' : 'password'}
+                          error={Boolean(errors.password)}
+                          {...(errors.password && { helperText: errors.password.message })}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position='end'>
+                                <IconButton
+                                  edge='end'
+                                  onMouseDown={e => e.preventDefault()}
+                                  onClick={() => setShowPassword(!showPassword)}
+                                >
+                                  <Icon
+                                    fontSize='1.25rem'
+                                    fontColor='black'
+                                    icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'}
+                                  />
+                                </IconButton>
+                              </InputAdornment>
+                            )
+                          }}
+                        />
+                      )}
+                    />
+                    <Button type='submit' variant='contained'>
+                      Set PIN & Password
+                    </Button>
+                  </form>
                 </div>
               ) : (
                 <Box sx={{ mb: 1.5 }}>
                   {isPinVisible && (
-                  <CustomTextField
-                    fullWidth
-                    label='PIN'
-                    rules={{ required: true }}
-                    onChange={pinHandler}
-                    id='auth-login-v2-password'
-                    type={showPassword ? 'text' : 'password'}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position='end'>
-                          <IconButton
-                            edge='end'
-                            onMouseDown={e => e.preventDefault()}
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            <Icon fontSize='1.25rem' icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                  )}
-
-{isPinVisible && (error && <p style={{ color: 'red' }}>{error.message}</p>)}
-<form onSubmit={passwordCheckHandler(onSubmitPass)}>
-                  {isPasswordVisible && (
-                  <Controller
-                  name='passwordCheck'
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field: { value, onChange } }) => (
                     <CustomTextField
                       fullWidth
-                      value={value}
-                      sx={{ mb: 4 }}
-                      label='Password'
-                      onChange={onChange}
+                      label='PIN'
+                      rules={{ required: true }}
+                      onChange={pinHandler}
+                      id='auth-login-v2-password'
                       type={showPassword ? 'text' : 'password'}
-                      error={Boolean(errors.password)}
-                      {...(errors.password && { helperText: errors.password.message })}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position='end'>
@@ -411,22 +376,61 @@ export default function QrCodeScanner() {
                               onMouseDown={e => e.preventDefault()}
                               onClick={() => setShowPassword(!showPassword)}
                             >
-                              <Icon fontSize='1.25rem' fontColor='black' icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
+                              <Icon fontSize='1.25rem' icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
                             </IconButton>
                           </InputAdornment>
                         )
                       }}
                     />
                   )}
-                />)}
-                  
-                  {isPassError && (error && <p style={{ color: 'red', marginTop: '0px'}}>{error.messagePass}</p>)}
 
-                  {isPasswordVisible && (
-                  <Button type='submit' variant='contained'>Continue with Password</Button>
-                  )}
+                  {isPinVisible && error && <p style={{ color: 'red' }}>{error.message}</p>}
+                  <form onSubmit={passwordCheckHandler(onSubmitPass)}>
+                    {isPasswordVisible && (
+                      <Controller
+                        name='passwordCheck'
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field: { value, onChange } }) => (
+                          <CustomTextField
+                            fullWidth
+                            value={value}
+                            sx={{ mb: 4 }}
+                            label='Password'
+                            onChange={onChange}
+                            type={showPassword ? 'text' : 'password'}
+                            error={Boolean(errors.password)}
+                            {...(errors.password && { helperText: errors.password.message })}
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position='end'>
+                                  <IconButton
+                                    edge='end'
+                                    onMouseDown={e => e.preventDefault()}
+                                    onClick={() => setShowPassword(!showPassword)}
+                                  >
+                                    <Icon
+                                      fontSize='1.25rem'
+                                      fontColor='black'
+                                      icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'}
+                                    />
+                                  </IconButton>
+                                </InputAdornment>
+                              )
+                            }}
+                          />
+                        )}
+                      />
+                    )}
+
+                    {isPassError && error && <p style={{ color: 'red', marginTop: '0px' }}>{error.messagePass}</p>}
+
+                    {isPasswordVisible && (
+                      <Button type='submit' variant='contained'>
+                        Continue with Password
+                      </Button>
+                    )}
                   </form>
-                  
                 </Box>
               )}
             </div>
@@ -434,9 +438,7 @@ export default function QrCodeScanner() {
             <div>
               <Alert severity='warning'>
                 <AlertTitle>QR Code doesn't match!</AlertTitle>
-                <Link href="/">
-                  Click Here 
-                </Link>
+                <Link href='/'>Click Here</Link>
                 &nbsp; to try again..
               </Alert>
               {/* <b>
@@ -446,8 +448,18 @@ export default function QrCodeScanner() {
           )}
         </>
       ) : (
-        <div style={{position:" relative ", width:" 100% ", maxWidth:" 600px ", margin:" 0 auto ",}}>
-          <div style={{position: "absolute ", top: "2px", left: "4px", width: "98% ", height: "21px ", backgroundColor: "#ffffff ", zIndex: "3"}}></div>
+        <div style={{ position: ' relative ', width: ' 100% ', maxWidth: ' 600px ', margin: ' 0 auto ' }}>
+          <div
+            style={{
+              position: 'absolute ',
+              top: '2px',
+              left: '4px',
+              width: '98% ',
+              height: '21px ',
+              backgroundColor: '#ffffff ',
+              zIndex: '3'
+            }}
+          ></div>
 
           {/* <div id='reader'  style={{position: "relative", padding: "10px", border: "1px solid #ccc", width: "100%", maxWidth: "600px", margin: "0 auto", { #reader__dashboard_section { display:"none" } }}}></div> */}
           <div id='reader'></div>
@@ -460,60 +472,68 @@ export default function QrCodeScanner() {
         </Button>
       </Divider> */}
 
-{isResetPIN && (<form onSubmit={handlePinSubmit(onPinSubmit)}>
-                  
-                  <Controller
-                    name='PIN'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field: { value, onChange } }) => (
-                      <CustomTextField
-                        fullWidth
-                        value={value}
-                        sx={{ mb: 4 }}
-                        label='PIN'
-                        onChange={onChange}
-                        type={showPassword ? 'text' : 'password'}
-                        error={Boolean(errors.PIN)}
-                        {...(errors.PIN && { helperText: errors.PIN.message })}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position='end'>
-                              <IconButton
-                                edge='end'
-                                onMouseDown={e => e.preventDefault()}
-                                onClick={() => setShowPassword(!showPassword)}
-                              >
-                                <Icon fontSize='1.25rem' fontColor='black' icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                      />
-                    )}
-                  />
-                  <Button type='submit' variant='contained'>Reset PIN</Button>
-          </form>
-)}
+      {isResetPIN && (
+        <form onSubmit={handlePinSubmit(onPinSubmit)}>
+          <Controller
+            name='PIN'
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { value, onChange } }) => (
+              <CustomTextField
+                fullWidth
+                value={value}
+                sx={{ mb: 4 }}
+                label='PIN'
+                onChange={onChange}
+                type={showPassword ? 'text' : 'password'}
+                error={Boolean(errors.PIN)}
+                {...(errors.PIN && { helperText: errors.PIN.message })}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        edge='end'
+                        onMouseDown={e => e.preventDefault()}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        <Icon
+                          fontSize='1.25rem'
+                          fontColor='black'
+                          icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'}
+                        />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+              />
+            )}
+          />
+          <Button type='submit' variant='contained'>
+            Reset PIN
+          </Button>
+        </form>
+      )}
 
       {open && (
         <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby='alert-dialog-title'
-        aria-describedby='alert-dialog-description'
-      >
-        <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
-          <Alert severity='warning'>
-            <AlertTitle>Please contact with Admin to RESET your Password.</AlertTitle>
-          </Alert>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions className='dialog-actions-dense'>
-          <Button variant='outlined' onClick={handleClose}>Close</Button>
-        </DialogActions>
-      </Dialog>
+          open={open}
+          onClose={handleClose}
+          aria-labelledby='alert-dialog-title'
+          aria-describedby='alert-dialog-description'
+        >
+          <DialogContent>
+            <DialogContentText id='alert-dialog-description'>
+              <Alert severity='warning'>
+                <AlertTitle>Please contact with Admin to RESET your Password.</AlertTitle>
+              </Alert>
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions className='dialog-actions-dense'>
+            <Button variant='outlined' onClick={handleClose}>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       )}
     </>
   )

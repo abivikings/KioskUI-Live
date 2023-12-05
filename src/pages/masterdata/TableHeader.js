@@ -18,7 +18,7 @@ const TableHeader = props => {
   const [masterdata, setMasterdata] = useState([]);
   console.log("masterdata", masterdata)
   console.log("props", props)
-  const my_url = `https://vehayamachanechakadosh.com:8080/api/Master?Stauts=all` ////// Leads Company Admin
+  const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/Master?Stauts=all` ////// Leads Company Admin
   async function fetchData() {
     const myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')

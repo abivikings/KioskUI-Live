@@ -1,0 +1,4 @@
+username,password,userrole,email,MemberId,fullname,Grade,Class
+test1_uname,9fw9ef,admin,test1@gmail.com,1,Mr Test 1,null,0
+test2_uname,9fw9rw3e,teacher,test2@gmail.com,2,Mr Test 2,null,0
+test3_uname,9fw93r2e,student,test3@gmail.com,3,Mr Test 3,C,2

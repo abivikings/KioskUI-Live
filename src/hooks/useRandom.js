@@ -32,16 +32,18 @@ export function useRandomPassword() {
       const lowercaseChars = 'abcdefghijklmnopqrstuvwxyz';
       const uppercaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       const numbers = '0123456789';
-      const specialChars = '!@#$%^&*()_+=-][}{|":?><,./;\'`~';
+      // const specialChars = '!@#$%^&*()_][}{';
   
       // Ensure at least one character from each category
       const randomLower = lowercaseChars[Math.floor(Math.random() * lowercaseChars.length)];
       const randomUpper = uppercaseChars[Math.floor(Math.random() * uppercaseChars.length)];
       const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
-      const randomSpecial = specialChars[Math.floor(Math.random() * specialChars.length)];
+      // const randomSpecial = specialChars[Math.floor(Math.random() * specialChars.length)];
   
-      const allChars = lowercaseChars + uppercaseChars + numbers + specialChars;
-      let generatedPassword = randomLower + randomUpper + randomNumber + randomSpecial;
+      // const allChars = lowercaseChars + uppercaseChars + numbers + specialChars;
+      const allChars = lowercaseChars + uppercaseChars + numbers ;
+      // let generatedPassword = randomLower + randomUpper + randomNumber + randomSpecial;
+      let generatedPassword = randomLower + randomUpper + randomNumber ;
   
       // Generate remaining characters
       for (let i = 0; i < 4; i++) {

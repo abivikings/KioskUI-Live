@@ -60,9 +60,9 @@ const CustomCloseButton = styled(IconButton)(({ theme }) => ({
 }))
 
 const AddUserDrawer = props => {
-  const { toggle } = props
+  const { toggle, userTypeChoosed } = props
   // const { fcontrols, ferrors } = useFormContext();
-  console.log('toggle', toggle);
+
   // ** States
   const [show, setShow] = useState(false)
 
@@ -71,23 +71,7 @@ const AddUserDrawer = props => {
     if (!show) {
       setShow(true)
     }
-  }
-
-  const demoData = {
-    MemberId: 1,
-    userrole: 'admin',
-    username: 'mrgreen',
-    EntryBy: 'sysadmin',
-    email: 'mrgreen@kiosk.com',
-    userId: 'mrgreen@kiosk.com',
-    password: 'Green',
-    UserProfiles: {
-      fullname: 'Mr Green',
-      Class: 'X',
-      grade: '15',
-      EntryBy: 'sysadmin'
-    }
-  }
+  } 
 
   const { randomString, generateRandomString } = useRandomString(4); // if you are wishing to gereate random string //
 
@@ -108,7 +92,7 @@ const AddUserDrawer = props => {
   const userRole = watch('userrole')
   useEffect(() => {
     console.log(userRole)
-    if(userRole !== "Student"){
+    if(userRole !== "student"){
       const inputClear = ['Class', 'grade']
       inputClear.forEach((fieldName)=>{
         setValue(fieldName, null)
@@ -191,6 +175,7 @@ const AddUserDrawer = props => {
 
   return (
     <Card>
+      <br/>
       <Button onClick={handleShow} variant='contained' sx={{ '& svg': { mr: 2 } }}>
         <Icon fontSize='1.125rem' icon='tabler:plus' />
         Add New User
@@ -289,6 +274,7 @@ const AddUserDrawer = props => {
                   name='userrole'
                   control={control}
                   rules={{ required: true }}
+                  defaultValue={userTypeChoosed}
                   render={({ field: { value, onChange } }) => (
                     <CustomTextField
                       select
@@ -306,9 +292,9 @@ const AddUserDrawer = props => {
                       }}
                     >
                       <option value='null'>User Role</option>
-                      <option value='Admin'>Admin</option>
-                      <option value='Teacher'>Teacher</option>
-                      <option value='Student'>
+                      <option value='admin'>Admin</option>
+                      <option value='teacher'>Teacher</option>
+                      <option value='student'>
                         Student
                       </option>
                     </CustomTextField>
@@ -343,7 +329,7 @@ const AddUserDrawer = props => {
                   )}
                 />
               </Grid>
-              {userRole === 'Student' && (
+              {userRole === 'student' && (
                 <>
                   <Grid item sm={6} xs={12}>
                     <Controller
