@@ -7,6 +7,7 @@ import AnalyticsEarningReports from 'src/views/dashboards/analytics/AnalyticsEar
 import AnalyticsSupportTracker from 'src/views/dashboards/analytics/AnalyticsSupportTracker'
 import AnalyticsWebsiteAnalyticsSlider from 'src/views/dashboards/analytics/AnalyticsWebsiteAnalyticsSlider'
 import ApexDonutChart from 'src/views/charts/apex-charts/ApexDonutChart'
+import EcommerceStatistics from 'src/views/dashboards/ecommerce/EcommerceStatistics'
 
 // ** Custom Component Import
 import KeenSliderWrapper from 'src/@core/styles/libs/keen-slider'
@@ -17,21 +18,28 @@ const AnalyticsDashboard = () => {
   return (
     <ApexChartWrapper>
       <KeenSliderWrapper>
-        <Grid container spacing={6}>
+        <Grid container spacing={5}>
+
           <Grid item xs={12} lg={6}>
             <AnalyticsWebsiteAnalyticsSlider />
             <br></br>
             <AnalyticsOrderVisits />
           </Grid>
+
           <Grid item xs={12} md={6}>
             <ApexDonutChart />
           </Grid>
+
           <Grid item xs={12} md={6}>
             <AnalyticsSupportTracker />
           </Grid>
+
           <Grid item xs={12} md={6}>
             <AnalyticsEarningReports />
+            <br></br>
+            <EcommerceStatistics />
           </Grid>
+
         </Grid>
       </KeenSliderWrapper>
     </ApexChartWrapper>
