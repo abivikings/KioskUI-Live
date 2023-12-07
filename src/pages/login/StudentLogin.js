@@ -117,6 +117,7 @@ export default function QrCodeScanner() {
     mode: 'onSubmit'
   })
 
+
   const userId = data.userId
   const memberId = data.memberId
 
@@ -189,6 +190,7 @@ export default function QrCodeScanner() {
   })
 
   const password = data.password
+
   const onPinSubmit = dataPIN => {
     const updatePIN = {
       password: password,
