@@ -5,11 +5,9 @@ import { Box } from '@mui/system'
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { Icon, IconButton, InputAdornment, Typography } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
-import Divider from '@mui/material/Divider'
 
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContentText from '@mui/material/DialogContentText'
@@ -24,8 +22,6 @@ import Link from 'next/link'
 // ** Form
 import { Controller, useForm } from 'react-hook-form'
 import { useRouter } from 'next/router'
-
-import Modal from '@mui/material'
 
 export default function QrCodeScanner() {
   const [isPinVisible, setPinVisible] = useState(true)
@@ -64,8 +60,6 @@ export default function QrCodeScanner() {
       axios
         .get(`${process.env.NEXT_PUBLIC_BASE_URL}api/GetUserInfoByUserId?UserId=${result}`)
         .then(response => setData(response.data))
-
-      //   alert('Get Lol')
     }
 
     function error(err) {
@@ -78,6 +72,7 @@ export default function QrCodeScanner() {
     setPasswordVisible(true)
   }
 
+  // PIN verrification for login starts
   function pinHandler(x) {
     console.log('student pin check', x)
     const val = Number(x.target.value)
@@ -107,20 +102,52 @@ export default function QrCodeScanner() {
       })
     }
   }
+  // PIN verrification for login ends
 
   const {
     control,
-    handleSubmit,
     formState: { errors },
     watch
   } = useForm({
     mode: 'onSubmit'
   })
 
-
   const userId = data.userId
   const memberId = data.memberId
+  const password = data.password
 
+  // PIN & Password reset for first time login starts
+  const handleSubmitPINpassSet = async e => {
+    e.preventDefault()
+    const formData = new FormData(e.target)
+    formData.append('userId', userId)
+    formData.append('memberId', memberId)
+
+    const PIN = formData.get('PIN')
+    const password = formData.get('password')
+
+    var PINpassData = {
+      userId: userId,
+      PIN: PIN,
+      password: password,
+      memberId: memberId
+    }
+
+    console.log(PINpassData)
+    try {
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_BASE_URL}api/User/PINPassword`, PINpassData) // Replace '/api/your-endpoint' with your API endpoint
+      // Handle successful response
+      console.log('Response:', response.data)
+      router.replace('/')
+    } catch (error) {
+      // Handle error
+      console.error('Error:', error)
+      window.alert('An error occurred. Please try again later.')
+    }
+  }
+  // PIN & Password reset for first time login ends
+
+  // PIN reset for if forget starts
   const handleSubmitPINreset = async e => {
     e.preventDefault()
     const formData = new FormData(e.target)
@@ -149,7 +176,9 @@ export default function QrCodeScanner() {
       window.alert('An error occurred. Please try again later.')
     }
   }
+  // PIN reset for if forget ends
 
+  // Password check before reset PIN starts
   const passwordCheck = watch('passwordCheck', '')
 
   const { handleSubmit: passwordCheckHandler } = useForm({
@@ -181,61 +210,11 @@ export default function QrCodeScanner() {
       setPassError(true)
     }
   }
+  // Password check before reset PIN ends
+
   const [open, setOpen] = React.useState(false)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
-
-  const { handleSubmit: handlePinSubmit } = useForm({
-    mode: 'onPinSubmit'
-  })
-
-  const password = data.password
-
-  const onPinSubmit = dataPIN => {
-    const updatePIN = {
-      password: password,
-      PIN: dataPIN.PINreset,
-      UserId: userId,
-      memberId: memberId
-    }
-
-    console.log('updatePIN ===> ', updatePIN)
-
-    updatePin(updatePIN)
-  }
-
-  const updatePin = async param => {
-    const myHeaders = new Headers()
-    myHeaders.append('Content-Type', 'application/json')
-
-    // myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
-
-    const requestOptions = {
-      method: 'PUT',
-      headers: myHeaders,
-      body: JSON.stringify(param),
-      redirect: 'follow'
-    }
-
-    console.log(requestOptions)
-
-    const res = await fetch(my_url, requestOptions)
-    const data = await res.json()
-    if (res.ok) {
-      // dispatch(usersList(userDispatch))
-      // setShow(false)
-      // toggle(true)
-      console.log('Turza PIN Okay')
-      router.replace('/')
-
-      return { ok: true, data }
-    } else {
-      console.log('Turza PIN Not Okay')
-      console.log('ERROR => ', data.error)
-
-      return { ok: false, err: res, data }
-    }
-  }
 
   return (
     <>
@@ -265,87 +244,76 @@ export default function QrCodeScanner() {
         <>
           {data.userId === scanResult && !succ ? (
             <div>
+              {/* if first time login, PIN & Password reset starts */}
               {data.userstatus === 'NEW' ? (
                 <div>
                   <h4>Please set up the PIN and password to continue..</h4>
 
-                  <form onSubmit={handleSubmit(onSubmit)}>
-                    <Controller
+                  <form onSubmit={handleSubmitPINpassSet}>
+                    <CustomTextField
                       name='PIN'
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field: { value, onChange } }) => (
-                        <CustomTextField
-                          fullWidth
-                          value={value}
-                          sx={{ mb: 4 }}
-                          label='PIN'
-                          onChange={onChange}
-                          type={showPassword ? 'text' : 'password'}
-                          error={Boolean(errors.PIN)}
-                          {...(errors.PIN && { helperText: errors.PIN.message })}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position='end'>
-                                <IconButton
-                                  edge='end'
-                                  onMouseDown={e => e.preventDefault()}
-                                  onClick={() => setShowPassword(!showPassword)}
-                                >
-                                  <Icon
-                                    fontSize='1.25rem'
-                                    fontColor='black'
-                                    icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'}
-                                  />
-                                </IconButton>
-                              </InputAdornment>
-                            )
-                          }}
-                        />
-                      )}
+                      autoFocus
+                      fullWidth
+                      sx={{ mb: 4 }}
+                      label='PIN'
+                      type={showPassword ? 'text' : 'password'}
+                      error={Boolean(errors.PINreset)}
+                      {...(errors.PINreset && { helperText: errors.PINreset.message })}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton
+                              edge='end'
+                              onMouseDown={e => e.preventDefault()}
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              <Icon
+                                fontSize='1.25rem'
+                                fontColor='black'
+                                icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'}
+                              />
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
                     />
 
-                    <Controller
+                    <CustomTextField
                       name='password'
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field: { value, onChange } }) => (
-                        <CustomTextField
-                          fullWidth
-                          value={value}
-                          sx={{ mb: 4 }}
-                          label='Password'
-                          onChange={onChange}
-                          type={showPassword ? 'text' : 'password'}
-                          error={Boolean(errors.password)}
-                          {...(errors.password && { helperText: errors.password.message })}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position='end'>
-                                <IconButton
-                                  edge='end'
-                                  onMouseDown={e => e.preventDefault()}
-                                  onClick={() => setShowPassword(!showPassword)}
-                                >
-                                  <Icon
-                                    fontSize='1.25rem'
-                                    fontColor='black'
-                                    icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'}
-                                  />
-                                </IconButton>
-                              </InputAdornment>
-                            )
-                          }}
-                        />
-                      )}
+                      autoFocus
+                      fullWidth
+                      sx={{ mb: 4 }}
+                      label='Password'
+                      type={showPassword ? 'text' : 'password'}
+                      error={Boolean(errors.PINreset)}
+                      {...(errors.PINreset && { helperText: errors.PINreset.message })}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton
+                              edge='end'
+                              onMouseDown={e => e.preventDefault()}
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              <Icon
+                                fontSize='1.25rem'
+                                fontColor='black'
+                                icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'}
+                              />
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
                     />
                     <Button type='submit' variant='contained'>
                       Set PIN & Password
                     </Button>
                   </form>
+                  {/* if first time login, PIN & Password reset ends */}
                 </div>
               ) : (
                 <Box sx={{ mb: 1.5 }}>
+                  {/* if old user, PIN verification for login starts */}
                   {isPinVisible && (
                     <CustomTextField
                       fullWidth
@@ -369,7 +337,9 @@ export default function QrCodeScanner() {
                       }}
                     />
                   )}
+                  {/* if old user, PIN verification for login ends */}
 
+                  {/* to reset PIN, password verification starts */}
                   {isPinVisible && error && <p style={{ color: 'red' }}>{error.message}</p>}
                   <form onSubmit={passwordCheckHandler(onSubmitPass)}>
                     {isPasswordVisible && (
@@ -417,19 +387,19 @@ export default function QrCodeScanner() {
                       </Button>
                     )}
                   </form>
+                  {/* to reset PIN, password verification ends */}
                 </Box>
               )}
             </div>
           ) : (
             <div>
+              {/* error Message starts */}
               <Alert severity='warning'>
                 <AlertTitle>QR Code doesn't match!</AlertTitle>
                 <Link href='/'>Click Here</Link>
                 &nbsp; to try again..
               </Alert>
-              {/* <b>
-                LOGIN SUCCESS {data.userid}. <br /> Please wait, we are validating your data.
-              </b> */}
+              {/* error Message ends */}
             </div>
           )}
         </>
@@ -446,18 +416,11 @@ export default function QrCodeScanner() {
               zIndex: '3'
             }}
           ></div>
-
-          {/* <div id='reader'  style={{position: "relative", padding: "10px", border: "1px solid #ccc", width: "100%", maxWidth: "600px", margin: "0 auto", { #reader__dashboard_section { display:"none" } }}}></div> */}
           <div id='reader'></div>
         </div>
       )}
 
-      {/* <Divider>
-        <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
-          Login
-        </Button>
-      </Divider> */}
-
+      {/* PIN reset starts */}
       {isResetPIN && (
         <form onSubmit={handleSubmitPINreset}>
           <CustomTextField
@@ -489,7 +452,9 @@ export default function QrCodeScanner() {
           </Button>
         </form>
       )}
+      {/* PIN reset ends */}
 
+      {/* PopUp message for Password reset starts */}
       {open && (
         <Dialog
           open={open}
@@ -511,6 +476,7 @@ export default function QrCodeScanner() {
           </DialogActions>
         </Dialog>
       )}
+      {/* PopUp message for Password reset starts */}
     </>
   )
 }
