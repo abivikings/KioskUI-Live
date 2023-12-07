@@ -71,9 +71,9 @@ const AddUserDrawer = props => {
     if (!show) {
       setShow(true)
     }
-  } 
+  }
 
-  const { randomString, generateRandomString } = useRandomString(4); // if you are wishing to gereate random string //
+  const { randomString, generateRandomString } = useRandomString(4) // if you are wishing to gereate random string //
 
   const { password, generateRandomPassword } = useRandomPassword()
 
@@ -84,7 +84,7 @@ const AddUserDrawer = props => {
     formState: { errors },
     getValues,
     watch,
-    setValue 
+    setValue
   } = useForm({
     mode: 'onSubmit'
   })
@@ -92,13 +92,13 @@ const AddUserDrawer = props => {
   const userRole = watch('userrole')
   useEffect(() => {
     console.log(userRole)
-    if(userRole !== "student"){
+    if (userRole !== 'student') {
       const inputClear = ['Class', 'grade']
-      inputClear.forEach((fieldName)=>{
+      inputClear.forEach(fieldName => {
         setValue(fieldName, null)
       })
     }
-  }, [userRole]);
+  }, [userRole])
 
   const auth = useAuth()
   const entryPerson = !!auth?.user ? auth?.user.userId : 'unauthorizedEntry'
@@ -124,8 +124,8 @@ const AddUserDrawer = props => {
       PIN: randomString,
       UserProfiles: {
         fullname: data.fullname,
-        Class: (data.Class)?data.Class:null,
-        grade: (data.grade)?data.grade:null,
+        Class: data.Class ? data.Class : null,
+        grade: data.grade ? data.grade : null,
         EntryBy: entryPerson
       }
     }
@@ -134,7 +134,7 @@ const AddUserDrawer = props => {
 
     postData(userAddData)
   }
-  const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/User` ////// 
+  const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/User` //////
 
   const postData = async param => {
     const myHeaders = new Headers()
@@ -154,8 +154,7 @@ const AddUserDrawer = props => {
     const res = await fetch(my_url, requestOptions)
     const data = await res.json()
     if (res.ok) {
-
-        // dispatch(usersList(userDispatch))
+      // dispatch(usersList(userDispatch))
       setShow(false)
       toggle(true)
 
@@ -174,9 +173,8 @@ const AddUserDrawer = props => {
   }
 
   return (
-    <Card>
-      <br/>
-      <Button onClick={handleShow} variant='contained' sx={{ '& svg': { mr: 2 } }}>
+    <Card sx={{ boxShadow: 'none' }}>
+      <Button onClick={handleShow} variant='contained' sx={{ '& svg': { mr: 2 }, marginTop: '20px' }}>
         <Icon fontSize='1.125rem' icon='tabler:plus' />
         Add New User
       </Button>
@@ -294,9 +292,7 @@ const AddUserDrawer = props => {
                       <option value='null'>User Role</option>
                       <option value='admin'>Admin</option>
                       <option value='teacher'>Teacher</option>
-                      <option value='student'>
-                        Student
-                      </option>
+                      <option value='student'>Student</option>
                     </CustomTextField>
                   )}
                 />

@@ -109,62 +109,43 @@ export default function QrCodeScanner() {
   }
 
   const {
-    reset,
     control,
     handleSubmit,
     formState: { errors },
-    getValues,
-    watch,
-    setValue
+    watch
   } = useForm({
     mode: 'onSubmit'
   })
+
   const userId = data.userId
+  const memberId = data.memberId
 
-  const onSubmit = data => {
-    const updatePINpass = {
-      password: data.password,
-      PIN: data.PIN,
-      UserId: userId,
-      UpdateBy: userId,
-      email: data.email,
-      userrole: data.userrole
+  const handleSubmitPINreset = async e => {
+    e.preventDefault()
+    const formData = new FormData(e.target)
+    formData.append('userId', userId)
+    formData.append('memberId', memberId)
+    formData.append('password', password)
+
+    const PIN = formData.get('PINreset')
+
+    var pData = {
+      userId: userId,
+      PIN: PIN,
+      password: password,
+      memberId: memberId
     }
 
-    console.log('updatePINpass ===> ', updatePINpass)
-
-    postData(updatePINpass)
-  }
-  const my_url = `${process.env.NEXT_PUBLIC_BASE_URL}api/User/PINPassword` //////
-
-  const postData = async param => {
-    const myHeaders = new Headers()
-    myHeaders.append('Content-Type', 'application/json')
-
-    // myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
-
-    const requestOptions = {
-      method: 'PUT',
-      headers: myHeaders,
-      body: JSON.stringify(param),
-      redirect: 'follow'
-    }
-
-    console.log(requestOptions)
-
-    const res = await fetch(my_url, requestOptions)
-    const data = await res.json()
-    if (res.ok) {
-      // dispatch(usersList(userDispatch))
-      // setShow(false)
-      // toggle(true)
+    console.log(pData)
+    try {
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_BASE_URL}api/User/PINPassword`, pData) // Replace '/api/your-endpoint' with your API endpoint
+      // Handle successful response
+      console.log('Response:', response.data)
       router.replace('/')
-
-      return { ok: true, data }
-    } else {
-      console.log('ERROR => ', data.error)
-
-      return { ok: false, err: res, data }
+    } catch (error) {
+      // Handle error
+      console.error('Error:', error)
+      window.alert('An error occurred. Please try again later.')
     }
   }
 
@@ -203,16 +184,17 @@ export default function QrCodeScanner() {
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
 
-
   const { handleSubmit: handlePinSubmit } = useForm({
     mode: 'onPinSubmit'
   })
 
-  const onPinSubmit = data => {
+  const password = data.password
+  const onPinSubmit = dataPIN => {
     const updatePIN = {
-      PIN: data.PIN,
+      password: password,
+      PIN: dataPIN.PINreset,
       UserId: userId,
-      UpdateBy: userId
+      memberId: memberId
     }
 
     console.log('updatePIN ===> ', updatePIN)
@@ -241,10 +223,12 @@ export default function QrCodeScanner() {
       // dispatch(usersList(userDispatch))
       // setShow(false)
       // toggle(true)
+      console.log('Turza PIN Okay')
       router.replace('/')
 
       return { ok: true, data }
     } else {
+      console.log('Turza PIN Not Okay')
       console.log('ERROR => ', data.error)
 
       return { ok: false, err: res, data }
@@ -279,7 +263,7 @@ export default function QrCodeScanner() {
         <>
           {data.userId === scanResult && !succ ? (
             <div>
-              {data.userstatus !== 'NEW' ? (
+              {data.userstatus === 'NEW' ? (
                 <div>
                   <h4>Please set up the PIN and password to continue..</h4>
 
@@ -473,41 +457,31 @@ export default function QrCodeScanner() {
       </Divider> */}
 
       {isResetPIN && (
-        <form onSubmit={handlePinSubmit(onPinSubmit)}>
-          <Controller
-            name='PIN'
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { value, onChange } }) => (
-              <CustomTextField
-                fullWidth
-                value={value}
-                sx={{ mb: 4 }}
-                label='PIN'
-                onChange={onChange}
-                type={showPassword ? 'text' : 'password'}
-                error={Boolean(errors.PIN)}
-                {...(errors.PIN && { helperText: errors.PIN.message })}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position='end'>
-                      <IconButton
-                        edge='end'
-                        onMouseDown={e => e.preventDefault()}
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        <Icon
-                          fontSize='1.25rem'
-                          fontColor='black'
-                          icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'}
-                        />
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }}
-              />
-            )}
+        <form onSubmit={handleSubmitPINreset}>
+          <CustomTextField
+            name='PINreset'
+            autoFocus
+            fullWidth
+            sx={{ mb: 4 }}
+            label='Reset PIN'
+            type={showPassword ? 'text' : 'password'}
+            error={Boolean(errors.PINreset)}
+            {...(errors.PINreset && { helperText: errors.PINreset.message })}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position='end'>
+                  <IconButton
+                    edge='end'
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <Icon fontSize='1.25rem' fontColor='black' icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
           />
+
           <Button type='submit' variant='contained'>
             Reset PIN
           </Button>
@@ -524,7 +498,7 @@ export default function QrCodeScanner() {
           <DialogContent>
             <DialogContentText id='alert-dialog-description'>
               <Alert severity='warning'>
-                <AlertTitle>Please contact with Admin to RESET your Password.</AlertTitle>
+                <AlertTitle>Please contact with Program Admin to RESET your Password.</AlertTitle>
               </Alert>
             </DialogContentText>
           </DialogContent>

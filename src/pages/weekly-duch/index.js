@@ -523,7 +523,7 @@ const StepperLinearWithValidation = () => {
                   Back
                 </Button>
                 <Button type='submit' variant='contained'>
-                  Submit
+                  Proceed
                 </Button>
               </Grid>
             </Grid>
@@ -538,11 +538,19 @@ const StepperLinearWithValidation = () => {
     if (activeStep === steps.length) {
       return (
         <Fragment>
-          <Typography>All steps are completed!</Typography>
-          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+          <Typography>Summary of the Submitted Data will be visible here..</Typography>
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
             <Button variant='contained' onClick={handleReset}>
               Reset
             </Button>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant='contained' onClick={handleBack} sx={{ marginRight: '10px' }} color='warning'>
+                Review
+              </Button>
+              <Button variant='contained' onClick={handleReset} color='success'>
+                Submit
+              </Button>
+            </Box>
           </Box>
         </Fragment>
       )
